@@ -1,48 +1,21 @@
-<nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-        <span class="sr-only">Toggle Navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">Jassem</a>
-    </div>
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reference <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a target="_blank" href="http://web.eecs.utk.edu/~plank/plank/classes/cs360/360/notes/Assembler1/lecture.html">Assembler 1: Introduction and Local Variables</a></li>
-            <li><a target="_blank" href="http://web.eecs.utk.edu/~plank/plank/classes/cs360/360/notes/Assembler2/lecture.html">Assembler 2: Procedures and Spilling</a></li>
-            <li><a target="_blank" href="http://web.eecs.utk.edu/~plank/plank/classes/cs360/360/notes/Assembler3/lecture.html">Assembler 3: Pointers</a></li>
-            <li><a target="_blank" href="http://web.eecs.utk.edu/~plank/plank/classes/cs360/360/notes/Assembler4/lecture.html">Assembler 4: Conditionals</a></li>
-          </ul>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav" style="float:right;list-style-type:none;">
-        <li><a href="https://github.com/schrismartin/jassem/tree/gh-pages">View on GitHub</a>
-    </div>
-  </div>
-</nav>
-
-<div class="container theme-showcase" role="main">
-
-  <div style="text-align: center;">
+<div class="container-fluid theme-showcase" role="main">
+  <div class="col-sm-10 col-sm-offset-1">
     <h1>CS360: Jassem Visualizer</h1>
-    <p>Assembly language created for educational use by <a target="-_blank" href="http://web.eecs.utk.edu/~plank/">Dr. James Plank</a>, Computer Science professor at <a target="_blank" href="http://www.utk.edu">University of Tennessee, Knoxville</a>.<br>
+  </div>
+
+  <div class="col-sm-10 col-sm-offset-1 text-center">
+    <p>Assembly language created for educational use by <a target="-_blank" href="//web.eecs.utk.edu/~plank/">Dr. James Plank</a>, Computer Science professor at <a target="_blank" href="//www.utk.edu">University of Tennessee, Knoxville</a>.<br>
       Visualizer modified for web by Chris Martin, COSC 360, Spring 2016, University of Tennessee, Knoxville.</p>
   </div>
 
-  <div class="well">
-    <p><div style="text-align: center;">Enter your complete J-Assembly program in the text box below and then press compile.<br>
+  <div class="col-sm-10 col-sm-offset-1 well text-center">
+    <p><div>Enter your complete J-Assembly program in the text box below and then press compile.<br>
     Use the buttons below to step forwards, step backwards, animate, and reset. <br>
     There is a convenience textbox to the side for any C code needed for reference.</div></p>
   </div>
 
   <!-- Visualizer -->
-  <div class="row" style="margin-bottom: 40px;">
+  <div class="col-sm-10 col-sm-offset-1 row" style="margin-bottom: 40px;">
     <div class="col">
       <div style="text-align: center;">
         <h4>Stack</h4>
@@ -192,7 +165,7 @@
   </div>
 
   <!-- Buttons -->
-  <div>
+  <div class="col-sm-10 col-sm-offset-1">
     <center>
       <button type="button" class="btn btn btn-primary">Compile</button>
       <button type="button" class="btn btn btn-default">Step Forwards</button>
@@ -203,7 +176,7 @@
   </div>
 
   <!-- Code Boxes -->
-  <div class="row">
+  <div class="col-sm-10 col-sm-offset-1 row">
     <div class="col">
       <h3><center>Assembly Code</center></h3>
     </div>
@@ -211,7 +184,7 @@
       <h3><center>C Code</center></h3>
     </div>
   </div>
-  <div class="row">
+  <div class="col-sm-10 col-sm-offset-1 row">
     <div id="assemDiv" class="col">
 						<textarea id="ta1" class="lined" rows="19">a:
      push #4
@@ -234,16 +207,7 @@ l2:
      ret</textarea>
     </div>
     <div id="panelDiv" class="col">
-				<textarea id="ta2" class="lined" rows="19">int a(int i, int j) {
-  int k;
-
-  if (i < j) {
-		k = i;
-	} else {
-		k = j;
-	}
-	return k;
-}</textarea>
+				<textarea id="ta2" class="lined" rows="19">{{main.cCode}}</textarea>
     </div>
 
     <!-- Add lines to textarea -->
