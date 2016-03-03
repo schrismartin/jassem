@@ -8,6 +8,6 @@
  * Controller of the jassemApp
  */
 angular.module('jassemApp')
-  .controller('FooterCtrl', function () {
-    this.year = new Date().getFullYear();
+  .controller('FooterCtrl', function ($scope) {
+    $scope.year = new Date().getFullYear();
   });

@@ -18,7 +18,8 @@ angular
     'ngSanitize',
     'ngTouch',
     'ui.router',
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'ui.codemirror'
   ])
   .config(function ($stateProvider, $locationProvider, $urlRouterProvider) {
     $locationProvider.html5Mode({'enabled': true, 'requireBase': false}).hashPrefix('!');
@@ -46,8 +47,7 @@ angular
     .state('contact',
       {
         url: '/contact',
-        templateUrl: 'views/contact.html',
-        title: 'Contact'
+        templateUrl: 'views/contact.html'
       })
     .state('404',
       {

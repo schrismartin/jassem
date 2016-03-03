@@ -20,25 +20,9 @@
       <div style="text-align: center;">
         <h4>Stack</h4>
         <table>
-          <tr>
-            <td>0xfff434</td>
-            <td class="boxEntry">0x0</td>
-          </tr>
-          <tr>
-            <td>0xfff438</td>
-            <td class="boxEntry">0x0</td>
-          </tr>
-          <tr>
-            <td>0xfff43c</td>
-            <td class="boxEntry">0x0</td>
-          </tr>
-          <tr>
-            <td>0xfff440</td>
-            <td class="boxEntry">0x0</td>
-          </tr>
-          <tr>
-            <td>0xfff444</td>
-            <td class="boxEntry">0x0</td>
+          <tr ng-repeat="(key, value) in main.stack">
+            <td>{{key}}</td>
+            <td class="boxEntry">{{value}}</td>
           </tr>
         </table>
       </div>
@@ -63,35 +47,35 @@
             <table>
               <tr>
                 <td>r0</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.r0}}</td>
               </tr>
               <tr>
                 <td>r1</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.r1}}</td>
               </tr>
               <tr>
                 <td>r2</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.r2}}</td>
               </tr>
               <tr>
                 <td>r3</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.r3}}</td>
               </tr>
               <tr>
                 <td>r4</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.r4}}</td>
               </tr>
               <tr>
                 <td>sp</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.sp}}</td>
               </tr>
               <tr>
                 <td>fp</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.fp}}</td>
               </tr>
               <tr>
                 <td>pc</td>
-                <td class="boxEntry">0x0</td>
+                <td class="boxEntry">{{main.pc}}</td>
               </tr>
             </table>
           </center>
@@ -104,7 +88,7 @@
       </div>
     </div>
     <div class="col">
-      <center>
+      <div style="text-align: center;">
         <h4>Code</h4>
         <table>
           <tr>
@@ -160,7 +144,7 @@
           </tr>
 
         </table>
-      </center>
+      </div>
     </div>
   </div>
 
@@ -175,7 +159,9 @@
     </center>
   </div>
 
-  <!-- Code Boxes -->
+
+
+   <!--Code Boxes-->
   <div class="col-sm-10 col-sm-offset-1 row">
     <div class="col">
       <h3><center>Assembly Code</center></h3>
@@ -185,48 +171,61 @@
     </div>
   </div>
   <div class="col-sm-10 col-sm-offset-1 row">
-    <div id="assemDiv" class="col">
-						<textarea id="ta1" class="lined" rows="19">a:
-     push #4
-     ld [fp+12] -> %r0           / Load i into r0
-     ld [fp+16] -> %r1           / Load j into r0
+    <!--<div id="assemDiv" class="col">-->
+						<!--<textarea id="ta1" class="lined" rows="19">a:-->
+     <!--push #4-->
+     <!--ld [fp+12] -> %r0           / Load i into r0-->
+     <!--ld [fp+16] -> %r1           / Load j into r0-->
 
-     cmp %r0, %r1                / Compare and branch on the negation (greater than or equal)
-     bge l1
+     <!--cmp %r0, %r1                / Compare and branch on the negation (greater than or equal)-->
+     <!--bge l1-->
 
-     ld [fp+12] -> %r0           / k = i
-     st %r0 -> [fp]
-     b l2
+     <!--ld [fp+12] -> %r0           / k = i-->
+     <!--st %r0 -> [fp]-->
+     <!--b l2-->
 
-l1:
-     ld [fp+16] -> %r0           / k = j
-     st %r0 -> [fp]
-l2:
+<!--l1:-->
+     <!--ld [fp+16] -> %r0           / k = j-->
+     <!--st %r0 -> [fp]-->
+<!--l2:-->
 
-     ld [fp] -> %r0              / return k
-     ret</textarea>
-    </div>
-    <div id="panelDiv" class="col">
-				<textarea id="ta2" class="lined" rows="19">{{main.cCode}}</textarea>
-    </div>
+     <!--ld [fp] -> %r0              / return k-->
+     <!--ret</textarea>-->
+    <!--</div>-->
+    <section style="border-style: solid; border-width: 1px;" class="col-sm-6">
+      <ui-codemirror ui-codemirror-opts="main.editorOptions" ng-model="main.assemCode"></ui-codemirror>
+    </section>
+    <section style="border-style: solid; border-width: 1px;" class="col-sm-5 col-sm-offset-1">
+      <ui-codemirror ui-codemirror-opts="main.editorOptions" ng-model="main.cCode"></ui-codemirror>
+    </section>
+    <!--<div id="panelDiv" class="col">-->
+				<!--<textarea id="ta2" class="lined" rows="19">{{main.cCode}}</textarea>-->
+    <!--</div>-->
 
     <!-- Add lines to textarea -->
-    <script> $(function() { $(".lined").linedtextarea({selectedLine: 1}); }); </script>
+    <!--<script> $(function() { $(".lined").linedtextarea({selectedLine: 1}); }); </script>-->
 
     <!-- Allow tabbing in textarea -->
-    <script>
-      var textareas = document.getElementsByTagName('textarea');
-      var count = textareas.length;
-      for(var i=0; i<count; i++){
-        textareas[i].onkeydown = function(e){
-          if(e.keyCode==9 || e.which==9){
-            e.preventDefault();
-            var s = this.selectionStart;
-            this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);
-            this.selectionEnd = s+1;
-          }
-        }
-      }
-    </script>
+    <!--<script>-->
+      <!--var textareas = document.getElementsByTagName('textarea');-->
+      <!--var count = textareas.length;-->
+      <!--for(var i=0; i<count; i++){-->
+        <!--textareas[i].onkeydown = function(e){-->
+          <!--if(e.keyCode==9 || e.which==9){-->
+            <!--e.preventDefault();-->
+            <!--var s = this.selectionStart;-->
+            <!--this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);-->
+            <!--this.selectionEnd = s+1;-->
+          <!--}-->
+        <!--}-->
+      <!--}-->
+    <!--</script>-->
 
   </div>
+  <pre class="col-sm-10 col-sm-offset-1 row">
+    {{main.cCode}}
+  </pre>
+  <pre class="col-sm-10 col-sm-offset-1 row">
+    {{main.assemCode}}
+  </pre>
+</div>
