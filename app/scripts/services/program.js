@@ -32,17 +32,23 @@ angular.module('jassemApp')
       }
     ];
 
-    var memory = Memory.memory;
+    var memory = null;
 
     this.compile = function (rawAssembly) {
+      Memory.resetMemory();
+      memory = Memory.memory();
       return memory;
     };
 
     this.stepForward = function () {
-
+      Memory.push(12);
+      Memory.push(123);
+      Memory.push(1234);
     };
 
     this.stepBackward = function () {
-
+      Memory.pop();
+      Memory.pop();
+      Memory.pop();
     }
   });

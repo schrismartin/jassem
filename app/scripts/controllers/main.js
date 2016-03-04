@@ -39,37 +39,34 @@ angular.module('jassemApp')
           'isActive': false
         }
       ],
-      global: []
+      global: [
+        {
+          'address': 0x4,
+          'value': 0x2,
+          'label': 'i',
+          'isActive': false
+        }
+      ]
     };
 
-    //this.stack = {
-    //    0xfff434: 0x0,
-    //    0xfff438: 0x0,
-    //    0xfff43c: 0x0,
-    //    0xfff440: 0x1,
-    //    0xfff444: 0x0
-    //
-    //};
-
-    //this.stack = Memory.stack();
-
-    //this.registers = Memory.registers;
-
-    //this.r0 = Memory.r0();
-    //this.r1 = Memory.r1();
-    //this.r2 = Memory.r2();
-    //this.r3 = Memory.r3();
-    //this.r4 = Memory.r4();
-    //this.sp = Memory.sp();
-    //this.fp = Memory.fp();
-    //this.fp = 0xfff434;
-    //this.pc = Memory.pc();
+    this.error = '';
 
     this.compile = function () {
+      this.error = '';
       this.memory = Program.compile(this.assemCode);
     };
-
-    //Memory.load(this.memory.stack[0].address, 'r0');
+    this.stepForward = function () {
+      try {
+        Program.stepForward();
+      }
+      catch (e) {
+        this.error = e.message;
+      }
+    };
+    this.stepBackward = function () {
+      this.error = '';
+      Program.stepBackward();
+    };
 
     this.runtimeStack = [
       {
@@ -87,29 +84,29 @@ angular.module('jassemApp')
 
     ]
 
-    this.pushToStack = function (addr, value) {
-      this.stack[addr] = value;
-    };
-
-    this.ld = function (addr) {
-      return this.stack[addr];
-    };
-
-    this.jsr = function () {
-      this.pushToStack(0xfff448, 12);
-      this.pushToStack(0xfff44c, 123);
-      this.pushToStack(0xfff450, 1234);
-    };
-
-    //this.r0 = this.ld(this.fp + 12);
-    //this.jsr();
-
-    this.editorOptions = {
+    this.assemblyEditorOptions = {
       lineWrapping : false,
       lineNumbers: true,
-      theme: 'twilight',
+      matchBrackets: true,
+      theme: 'solarized light',
+      //keyMap: 'vim'
       //readOnly: 'nocursor',
       //mode: 'xml',
+    };
+
+    this.cCodeEditorOptions = {
+      lineWrapping : false,
+      lineNumbers: true,
+      theme: 'solarized light',
+      matchBrackets: true,
+      mode: 'text/x-csrc',
+      //keyMap: 'vim'
+      //readOnly: 'nocursor',
+    };
+
+    this.letThereBeVIM = function () {
+      this.assemblyEditorOptions['keyMap'] = 'vim';
+      this.cCodeEditorOptions['keyMap'] = 'vim';
     };
 
     this.cCode = "\
