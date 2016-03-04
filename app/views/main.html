@@ -8,157 +8,100 @@
       Visualizer modified for web by Chris Martin, COSC 360, Spring 2016, University of Tennessee, Knoxville.</p>
   </div>
 
-  <div class="col-sm-10 col-sm-offset-1 well text-center">
+  <div class="col-sm-6 col-sm-offset-3 well text-center">
     <p><div>Enter your complete J-Assembly program in the text box below and then press compile.<br>
     Use the buttons below to step forwards, step backwards, animate, and reset. <br>
     There is a convenience textbox to the side for any C code needed for reference.</div></p>
   </div>
 
-  <!-- Visualizer -->
-  <div class="col-sm-10 col-sm-offset-1 row" style="margin-bottom: 40px;">
-    <div class="col">
-      <div style="text-align: center;">
-        <h4>Stack</h4>
-        <table>
-          <tr ng-repeat="(key, value) in main.stack">
-            <td>{{key}}</td>
-            <td class="boxEntry">{{value}}</td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <div class="col">
-      <div class="row">
-        <div class="col">
-          <div style="text-align: center;">
-            <h4>Step</h4>
-            <table>
-              <tr>
-                <td>CSR</td>
-                <td class="boxEntry">0x0</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <div class="col">
-          <center>
-            <h4>Registers</h4>
-            <table>
-              <tr>
-                <td>r0</td>
-                <td class="boxEntry">{{main.r0}}</td>
-              </tr>
-              <tr>
-                <td>r1</td>
-                <td class="boxEntry">{{main.r1}}</td>
-              </tr>
-              <tr>
-                <td>r2</td>
-                <td class="boxEntry">{{main.r2}}</td>
-              </tr>
-              <tr>
-                <td>r3</td>
-                <td class="boxEntry">{{main.r3}}</td>
-              </tr>
-              <tr>
-                <td>r4</td>
-                <td class="boxEntry">{{main.r4}}</td>
-              </tr>
-              <tr>
-                <td>sp</td>
-                <td class="boxEntry">{{main.sp}}</td>
-              </tr>
-              <tr>
-                <td>fp</td>
-                <td class="boxEntry">{{main.fp}}</td>
-              </tr>
-              <tr>
-                <td>pc</td>
-                <td class="boxEntry">{{main.pc}}</td>
-              </tr>
-            </table>
-          </center>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <h4><center>Globals</center></h4>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div style="text-align: center;">
-        <h4>Code</h4>
-        <table>
-          <tr>
-            <td>0x1000</td>
-            <td class="boxEntry">push #4</td>
-            <td>a:</td>
-          </tr>
-          <tr>
-            <td>0x1004</td>
-            <td class="boxEntry">ld [fp+12] -> %r0 </td>
-          </tr>
-          <tr>
-            <td>0x1008</td>
-            <td class="boxEntry">ld [fp+16] -> %r1 </td>
-          </tr>
-          <tr>
-            <td>0x100c</td>
-            <td class="boxEntry">cmp %r0, %r1 </td>
-          </tr>
-          <tr>
-            <td>0x1010</td>
-            <td class="boxEntry">bge l1</td>
-          </tr>
-          <tr>
-            <td>0x1014</td>
-            <td class="boxEntry">ld [fp+12] -> %r0</td>
-          </tr>
-          <tr>
-            <td>0x1018</td>
-            <td class="boxEntry">st %r0 -> [fp]</td>
-          </tr>
-          <tr>
-            <td>0x101c</td>
-            <td class="boxEntry">b l2</td>
-          </tr>
-          <tr>
-            <td>0x1020</td>
-            <td class="boxEntry">ld [fp+16] -> %r0 </td>
-            <td>l1:</td>
-          </tr>
-          <tr>
-            <td>0x1024</td>
-            <td class="boxEntry">st %r0 -> [fp]</td>
-          </tr>
-          <tr>
-            <td>0x1028</td>
-            <td class="boxEntry">ld [fp] -> %r0 </td>
-            <td>l2:</td>
-          </tr>
-          <tr>
-            <td>0x102c</td>
-            <td class="boxEntry">ret</td>
-          </tr>
-
-        </table>
-      </div>
-    </div>
-  </div>
-
   <!-- Buttons -->
-  <div class="col-sm-10 col-sm-offset-1">
-    <center>
-      <button type="button" class="btn btn btn-primary">Compile</button>
-      <button type="button" class="btn btn btn-default">Step Forwards</button>
-      <button type="button" class="btn btn btn-default">Step Backwards</button>
-      <button type="button" class="btn btn btn-default">Animate</button>
-      <button type="button" class="btn btn btn-danger">Reset</button>
-    </center>
+  <div class="col-sm-12 text-center">
+    <button type="button" class="btn btn btn-primary" ng-click="main.compile()">Compile</button>
+    <button type="button" class="btn btn btn-default" ng-click="main.stepForward()">Step Forwards</button>
+    <button type="button" class="btn btn btn-default" ng-click="main.stepBackward()">Step Backwards</button>
+    <button type="button" class="btn btn btn-default">Animate</button>
+    <button type="button" class="btn btn btn-danger">Reset</button>
+    <button type="button" class="btn btn btn-danger" ng-click="main.letThereBeVIM()">VIM!</button>
   </div>
 
+  <!--<div ng-if="main.error" class="col-sm-12 text-center alert alert-danger" role="alert">{{main.error}}</div>-->
+
+  <!-- Visualizer -->
+  <div  style="margin-bottom: 40px;">
+    <div ng-class="{alert: main.error, 'alert-danger': main.error}" class="col-sm-12 text-center" role="alert">
+      <div ng-if="main.error" class="col-sm-12 text-center" style="margin-bottom: 40px; font-size: xx-large;">{{main.error}}</div>
+      <div class="col-sm-4">
+        <h4 class="text-center">Stack</h4>
+        <table class="col-xs-12" style="margin-bottom: 20px;">
+          <tr ng-repeat="stackVar in main.memory.stack">
+            <td>{{stackVar.address | hex}}</td>
+            <td class="boxEntry">{{stackVar.value | hex}}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-sm-4">
+        <h4 class="text-center">Step</h4>
+        <table class="col-xs-12" style="margin-bottom: 20px;">
+          <tr>
+            <td>CSR</td>
+            <td class="boxEntry">0x0</td>
+          </tr>
+        </table>
+        <h4 class="text-center">Registers</h4>
+        <table class="col-xs-12" style="margin-bottom: 20px;">
+          <tr>
+            <td>r0</td>
+            <td class="boxEntry">{{main.memory.r0 | hex}}</td>
+          </tr>
+          <tr>
+            <td>r1</td>
+            <td class="boxEntry">{{main.memory.r1 | hex}}</td>
+          </tr>
+          <tr>
+            <td>r2</td>
+            <td class="boxEntry">{{main.memory.r2 | hex}}</td>
+          </tr>
+          <tr>
+            <td>r3</td>
+            <td class="boxEntry">{{main.memory.r3 | hex}}</td>
+          </tr>
+          <tr>
+            <td>r4</td>
+            <td class="boxEntry">{{main.memory.r4 | hex}}</td>
+          </tr>
+          <tr>
+            <td>sp</td>
+            <td class="boxEntry">{{main.memory.sp | hex}}</td>
+          </tr>
+          <tr>
+            <td>fp</td>
+            <td class="boxEntry">{{main.memory.fp | hex}}</td>
+          </tr>
+          <tr>
+            <td>pc</td>
+            <td class="boxEntry">{{main.memory.pc | hex}}</td>
+          </tr>
+        </table>
+        <h4 class="text-center">Globals</h4>
+        <table class="col-xs-12" style="margin-bottom: 20px;">
+          <tr ng-repeat="globalVar in main.memory.global">
+            <td>{{globalVar.address | hex}}</td>
+            <td class="boxEntry">{{globalVar.value | hex}}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-sm-4">
+        <h4 class="text-center">Code</h4>
+        <table class="col-xs-12" style="margin-bottom: 20px;">
+          <tr ng-repeat="stackVar in main.memory.stack">
+            <td>{{stackVar.address | hex}}</td>
+            <td class="boxEntry">{{stackVar.value | hex}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
 
 
    <!--Code Boxes-->
@@ -170,62 +113,18 @@
       <h3><center>C Code</center></h3>
     </div>
   </div>
-  <div class="col-sm-10 col-sm-offset-1 row">
-    <!--<div id="assemDiv" class="col">-->
-						<!--<textarea id="ta1" class="lined" rows="19">a:-->
-     <!--push #4-->
-     <!--ld [fp+12] -> %r0           / Load i into r0-->
-     <!--ld [fp+16] -> %r1           / Load j into r0-->
-
-     <!--cmp %r0, %r1                / Compare and branch on the negation (greater than or equal)-->
-     <!--bge l1-->
-
-     <!--ld [fp+12] -> %r0           / k = i-->
-     <!--st %r0 -> [fp]-->
-     <!--b l2-->
-
-<!--l1:-->
-     <!--ld [fp+16] -> %r0           / k = j-->
-     <!--st %r0 -> [fp]-->
-<!--l2:-->
-
-     <!--ld [fp] -> %r0              / return k-->
-     <!--ret</textarea>-->
-    <!--</div>-->
+  <div class="col-sm-10 col-sm-offset-1 row" style="margin-bottom: 20px;">
     <section style="border-style: solid; border-width: 1px;" class="col-sm-6">
-      <ui-codemirror ui-codemirror-opts="main.editorOptions" ng-model="main.assemCode"></ui-codemirror>
+      <ui-codemirror ui-codemirror-opts="main.assemblyEditorOptions" ng-model="main.assemCode"></ui-codemirror>
     </section>
     <section style="border-style: solid; border-width: 1px;" class="col-sm-5 col-sm-offset-1">
-      <ui-codemirror ui-codemirror-opts="main.editorOptions" ng-model="main.cCode"></ui-codemirror>
+      <ui-codemirror ui-codemirror-opts="main.cCodeEditorOptions" ng-model="main.cCode"></ui-codemirror>
     </section>
-    <!--<div id="panelDiv" class="col">-->
-				<!--<textarea id="ta2" class="lined" rows="19">{{main.cCode}}</textarea>-->
-    <!--</div>-->
-
-    <!-- Add lines to textarea -->
-    <!--<script> $(function() { $(".lined").linedtextarea({selectedLine: 1}); }); </script>-->
-
-    <!-- Allow tabbing in textarea -->
-    <!--<script>-->
-      <!--var textareas = document.getElementsByTagName('textarea');-->
-      <!--var count = textareas.length;-->
-      <!--for(var i=0; i<count; i++){-->
-        <!--textareas[i].onkeydown = function(e){-->
-          <!--if(e.keyCode==9 || e.which==9){-->
-            <!--e.preventDefault();-->
-            <!--var s = this.selectionStart;-->
-            <!--this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);-->
-            <!--this.selectionEnd = s+1;-->
-          <!--}-->
-        <!--}-->
-      <!--}-->
-    <!--</script>-->
 
   </div>
-  <pre class="col-sm-10 col-sm-offset-1 row">
-    {{main.cCode}}
-  </pre>
-  <pre class="col-sm-10 col-sm-offset-1 row">
-    {{main.assemCode}}
-  </pre>
+
+  <script>
+    var mac = CodeMirror.keyMap.default == CodeMirror.keyMap.macDefault;
+    CodeMirror.keyMap.default[(mac ? "Cmd" : "Ctrl") + "-Space"] = "autocomplete";
+  </script>
 </div>

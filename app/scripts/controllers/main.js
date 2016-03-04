@@ -8,7 +8,7 @@
  * Controller of the jassemApp
  */
 angular.module('jassemApp')
-  .controller('MainCtrl', function () {
+  .controller('MainCtrl', function (Program) {
     this.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
@@ -21,23 +21,52 @@ angular.module('jassemApp')
         'foobar'
     ];
 
-    this.stack = {
-        0xfff434: 0x0,
-        0xfff438: 0x0,
-        0xfff43c: 0x0,
-        0xfff440: 0x1,
-        0xfff444: 0x0
-
+    this.memory = {
+      r0: 0x2,
+      r1: 0x2,
+      r2: 0x2,
+      r3: 0x2,
+      r4: 0x2,
+      sp: 0x2,
+      fp: 0x2,
+      pc: 0x2,
+      csr: 0x2,
+      stack: [
+        {
+          'address': 0xfff434,
+          'value': 0x2,
+          'label': '',
+          'isActive': false
+        }
+      ],
+      global: [
+        {
+          'address': 0x4,
+          'value': 0x2,
+          'label': 'i',
+          'isActive': false
+        }
+      ]
     };
 
-    this.r0 = 0x0;
-    this.r1 = 0x0;
-    this.r2 = 0x0;
-    this.r3 = 0x0;
-    this.r4 = 0x0;
-    this.sp = 0x0;
-    this.fp = 0xfff434;
-    this.pc = 0x0;
+    this.error = '';
+
+    this.compile = function () {
+      this.error = '';
+      this.memory = Program.compile(this.assemCode);
+    };
+    this.stepForward = function () {
+      try {
+        Program.stepForward();
+      }
+      catch (e) {
+        this.error = e.message;
+      }
+    };
+    this.stepBackward = function () {
+      this.error = '';
+      Program.stepBackward();
+    };
 
     this.runtimeStack = [
       {
@@ -55,32 +84,33 @@ angular.module('jassemApp')
 
     ]
 
-    this.pushToStack = function (addr, value) {
-      this.stack[addr] = value;
-    };
-
-    this.ld = function (addr) {
-      return this.stack[addr];
-    };
-
-    this.jsr = function () {
-      this.pushToStack(0xfff448, 12);
-      this.pushToStack(0xfff44c, 123);
-      this.pushToStack(0xfff450, 1234);
-    };
-
-    this.r0 = this.ld(this.fp + 12);
-    this.jsr();
-
-    this.editorOptions = {
-      lineWrapping : true,
+    this.assemblyEditorOptions = {
+      lineWrapping : false,
       lineNumbers: true,
-      theme: 'twilight',
+      matchBrackets: true,
+      theme: 'solarized light',
+      //keyMap: 'vim'
       //readOnly: 'nocursor',
       //mode: 'xml',
     };
 
-    this.cCode = "int a(int i, int j) {\n\
+    this.cCodeEditorOptions = {
+      lineWrapping : false,
+      lineNumbers: true,
+      theme: 'solarized light',
+      matchBrackets: true,
+      mode: 'text/x-csrc',
+      //keyMap: 'vim'
+      //readOnly: 'nocursor',
+    };
+
+    this.letThereBeVIM = function () {
+      this.assemblyEditorOptions['keyMap'] = 'vim';
+      this.cCodeEditorOptions['keyMap'] = 'vim';
+    };
+
+    this.cCode = "\
+int a(int i, int j) {\n\
   int k;\n\
 \n\
   if (i < j) {\n\
@@ -91,16 +121,24 @@ angular.module('jassemApp')
   return k;\n\
 }";
 
-    this.assemCode = "asdf int a(int i, int j) {\n\
-  int k;\n\
+    this.assemCode = "\
+a:\n\
+    push #4\n\
+    ld [fp+12] -> %r0           / Load i into r0\n\
+    ld [fp+16] -> %r1           / Load j into r0\n\
 \n\
-  if (i < j) {\n\
-    k = i;\n\
-  } else {\n\
-    k = j;\n\
-  }\n\
-  return k;\n\
-}";
-
-      //this.stack['0xfff448'] = 0x0
+    cmp %r0, %r1                / Compare and branch on the negation (greater than or equal)\n\
+    bge l1\n\
+\n\
+    ld [fp+12] -> %r0           / k = i\n\
+    st %r0 -> [fp]\n\
+    b l2\n\
+\n\
+    l1:\n\
+      ld [fp+16] -> %r0           / k = j\n\
+    st %r0 -> [fp]\n\
+    l2:\n\
+\n\
+      ld [fp] -> %r0              / return k\n\
+    ret";
   });

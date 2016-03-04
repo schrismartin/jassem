@@ -158,6 +158,9 @@ module.exports = function (grunt) {
 
     // Empties folders to start fresh
     clean: {
+      options: {
+        force: true
+      },
       dist: {
         files: [{
           dot: true,
@@ -437,7 +440,7 @@ module.exports = function (grunt) {
       pages: {
         options: {
           remote: 'git@github.com:schrismartin/jassem.git',
-          branch: 'gh-pages-test'
+          branch: 'gh-pages'
         }
       },
       local: {
