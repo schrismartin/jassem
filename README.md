@@ -1,7 +1,6 @@
 # jassem
 
-This project is generated with [yo angular generator](https://github.com/yeoman/generator-angular)
-version 0.15.1.
+A web implementation of James Plank's J-Assembly language and visualizer
 
 ## Build & development
 
