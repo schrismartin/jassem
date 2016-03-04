@@ -49,11 +49,24 @@ angular.module('jassemApp')
       ]
     };
 
+    this.code = [
+      {
+        'address': 0x1000,
+        'value': 'push #4',
+        'label': 'a:',
+        'isActive': false
+      },
+    ];
+
     this.error = '';
+
+    this.reset = function () {
+    };
 
     this.compile = function () {
       this.error = '';
       this.memory = Program.compile(this.assemCode);
+      this.code = Program.code();
     };
     this.stepForward = function () {
       try {

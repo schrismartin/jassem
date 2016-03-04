@@ -5,6 +5,11 @@
   padding: 0.2em 0;
 }
 
+.active-cell {
+  color: white;
+  background: cornflowerblue;
+}
+
 body {
   padding: 0;
 }

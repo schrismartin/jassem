@@ -20,7 +20,7 @@
     <button type="button" class="btn btn btn-default" ng-click="main.stepForward()">Step Forwards</button>
     <button type="button" class="btn btn btn-default" ng-click="main.stepBackward()">Step Backwards</button>
     <button type="button" class="btn btn btn-default">Animate</button>
-    <button type="button" class="btn btn btn-danger">Reset</button>
+    <button type="button" class="btn btn btn-danger" ng-click="main.reset()">Reset</button>
     <button type="button" class="btn btn btn-danger" ng-click="main.letThereBeVIM()">VIM!</button>
   </div>
 
@@ -93,9 +93,9 @@
       <div class="col-sm-4">
         <h4 class="text-center">Code</h4>
         <table class="col-xs-12" style="margin-bottom: 20px;">
-          <tr ng-repeat="stackVar in main.memory.stack">
-            <td>{{stackVar.address | hex}}</td>
-            <td class="boxEntry">{{stackVar.value | hex}}</td>
+          <tr ng-repeat="codeVar in main.code">
+            <td>{{codeVar.address | hex}}</td>
+            <td ng-class="{'active-cell': codeVar.isActive === true}" class="boxEntry">{{codeVar.value}}</td>
           </tr>
         </table>
       </div>
