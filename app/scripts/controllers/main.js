@@ -55,18 +55,18 @@ angular.module('jassemApp')
         'value': 'push #4',
         'label': 'a:',
         'isActive': false
-      },
+      }
     ];
 
     this.error = '';
 
-    this.reset = function () {
-    };
+    this.reset = function () {}
+    ;
 
     this.compile = function () {
       this.error = '';
       this.memory = Program.compile(this.assemCode);
-      this.code = Program.code();
+      this.code = Program.parseCode(this.assemCode);
     };
     this.stepForward = function () {
       try {
@@ -134,8 +134,7 @@ int a(int i, int j) {\n\
   return k;\n\
 }";
 
-    this.assemCode = "\
-a:\n\
+    this.assemCode = "a:\n\
     push #4\n\
     ld [fp+12] -> %r0           / Load i into r0\n\
     ld [fp+16] -> %r1           / Load j into r0\n\
@@ -147,11 +146,11 @@ a:\n\
     st %r0 -> [fp]\n\
     b l2\n\
 \n\
-    l1:\n\
-      ld [fp+16] -> %r0           / k = j\n\
+l1:\n\
+    ld [fp+16] -> %r0           / k = j\n\
     st %r0 -> [fp]\n\
-    l2:\n\
+l2:\n\
 \n\
-      ld [fp] -> %r0              / return k\n\
+    ld [fp] -> %r0              / return k\n\
     ret";
   });

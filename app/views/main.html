@@ -5,7 +5,7 @@
 
   <div class="col-sm-10 col-sm-offset-1 text-center">
     <p>Assembly language created for educational use by <a target="-_blank" href="//web.eecs.utk.edu/~plank/">Dr. James Plank</a>, Computer Science professor at <a target="_blank" href="//www.utk.edu">University of Tennessee, Knoxville</a>.<br>
-      Visualizer modified for web by Chris Martin, COSC 360, Spring 2016, University of Tennessee, Knoxville.</p>
+      Visualizer modified for web by Chris Martin and Mark Adams, COSC 360, Spring 2016, University of Tennessee, Knoxville.</p>
   </div>
 
   <div class="col-sm-6 col-sm-offset-3 well text-center">
@@ -17,8 +17,8 @@
   <!-- Buttons -->
   <div class="col-sm-12 text-center">
     <button type="button" class="btn btn btn-primary" ng-click="main.compile()">Compile</button>
-    <button type="button" class="btn btn btn-default" ng-click="main.stepForward()">Step Forwards</button>
     <button type="button" class="btn btn btn-default" ng-click="main.stepBackward()">Step Backwards</button>
+    <button type="button" class="btn btn btn-default" ng-click="main.stepForward()">Step Forwards</button>
     <button type="button" class="btn btn btn-default">Animate</button>
     <button type="button" class="btn btn btn-danger" ng-click="main.reset()">Reset</button>
     <button type="button" class="btn btn btn-danger" ng-click="main.letThereBeVIM()">VIM!</button>
@@ -96,6 +96,7 @@
           <tr ng-repeat="codeVar in main.code">
             <td>{{codeVar.address | hex}}</td>
             <td ng-class="{'active-cell': codeVar.isActive === true}" class="boxEntry">{{codeVar.value}}</td>
+            <td>{{codeVar.label}}</td>
           </tr>
         </table>
       </div>
