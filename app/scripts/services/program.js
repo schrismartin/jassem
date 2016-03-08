@@ -18,33 +18,15 @@ angular.module('jassemApp')
 
      */
 
-    var operation = {
-      // Components of lines in code
-      // for use in calculations.
-      'funcname': '',
-      'arg1': '', // Args might be better as an array?
-      'arg2': '',
-      'arg3': '',
-      'size': 0
-    };
+    var currentLabel = '';
+    var currentAddress = 0x1000;
 
     var operations = [
       {
-        'funcname': '',
-        'arg1': '',
-        'arg2': '',
-        'arg3': ''
+        'funcname': 'ld',
+        'args': ['i', '%r0']
       }
     ];
-
-    var symbol = {
-      // A single line, shown
-      // in the 'Code' section.
-      'address': 0x1000,
-      'value': 'value',
-      'label': '',
-      'isActive': true
-    };
 
     var code = [
       { // Basically same as 'symbol' object
@@ -71,6 +53,25 @@ angular.module('jassemApp')
       return code;
     };
 
+    var formatOperation = function (operation) {
+      var funcname = operation.funcname;
+      var args = operation.args;
+      switch(args.length) {
+        case 0:
+          return funcname;
+        case 1:
+          return "{0} {1}".format(funcname, args[0]);
+        case 2:
+          if (funcname == "cmp") {
+            return "{0} {1}, {2}".format(funcname, args[0], args[1]);
+          } else {
+            return "{0} {1} -> {2}".format(funcname, args[0], args[1]);
+          }
+        case 3:
+          return "{0} {1}, {2} -> {3}".format(funcname, args[0], args[1], args[2]);
+      }
+    };
+
     this.operations = function() {
       return operations;
     };
@@ -78,7 +79,7 @@ angular.module('jassemApp')
     this.parseCode = function (assemCode) {
       code = [];
       operations = [];
-      symbol.address = 0x0ffc;
+      currentAddress = 0x0ffc;
       var lines = assemCode.split("\n");
       var lineOperation;
 
@@ -88,6 +89,9 @@ angular.module('jassemApp')
         line = line.trim();
         //code.push(this.parseLine(line, 0, ""));
         lineOperation = parseLine(line, 0, "");
+        if(lineOperation != undefined) {
+          addSymbol(lineOperation);
+        }
         operations.push(lineOperation);
       });
 
@@ -101,8 +105,8 @@ angular.module('jassemApp')
 
       var char = line.charAt(index);
       if(substr == "ret") { // Only instruction lacking a space
-        addSymbol(line);
-        return getOperation(line, 0);
+        var operation = getOperation(line, 0);
+        return operation
       }
       if(index == line.length) { return; }
 
@@ -111,7 +115,6 @@ angular.module('jassemApp')
           setLabel(substr);
           return;
         case ' ':
-          addSymbol(line);
           switch(substr) {
             // All 3-argument Commands
             case "add":
@@ -120,7 +123,7 @@ angular.module('jassemApp')
             case "idiv":
             case "imod":
               return getOperation(line, 3);
-            // All 3-argument Commands
+            // All 2-argument Commands
             case "ld":
             case "st":
             case "cmp":
@@ -142,39 +145,43 @@ angular.module('jassemApp')
       }
     };
 
-    var getOperation = function(str, args) {
+    var getOperation = function(str, numArgs) {
       // Takes line and disassembles into components using regex
-      var object = angular.copy(operation);
       var regex;
-      switch(args) {
+      switch(numArgs) {
         case 0: regex = /^(\S+)$/g; break;
         case 1: regex = /^(\S+)\s+(\S+)$/g; break;
         case 2: regex = /^(\S+)\s+(\S+)\s*(?:,|\->)\s*(\S+)$/g; break;
         case 3: regex = /^(\S+)\s+(\S+)\s*,\s*(\S+)\s*->\s?(\S+)$/g; break;
-        default: throw("OutOfBoundsException: Must provide number between 0 and 3");
+        default: throw("OutOfBoundsException: Must provide number between 0 and 3. Found: " + numArgs);
       }
 
       var match = regex.exec(str);
-      object.funcname = match[1];
-      object.arg1 = match[2];
-      object.arg2 = match[3];
-      object.arg3 = match[4];
-      object.size = args;
+      var object = {
+        'funcname': match[1],
+        'args': [],
+        'label': currentLabel
+      };
+      currentLabel = undefined;
+      for(var i = 2; i < 5; i++) {
+        if (match[i] != undefined) object.args.push(match[i]);
+      }
       console.log(object);
       return object;
     }
 
     var setLabel = function(label) {
-      symbol.label = label + ':';
+      currentLabel = label;
     };
 
-    var addSymbol = function(value) {
-      symbol.address += 4;
-      symbol.value = value;
-      symbol.isActive = false;
-      var newSymbol = angular.copy(symbol);
-      symbol.label = "";
-      code.push(newSymbol);
+    var addSymbol = function(op) {
+      var codeSymbol = {
+        'address': currentAddress += 4,
+        'value': formatOperation(op),
+        'isActive': false,
+        'label': op.label
+      };
+      code.push(codeSymbol);
     };
 
     var memory = null;
@@ -213,4 +220,14 @@ angular.module('jassemApp')
       Memory.pop();
       Memory.pop();
     }
+
+    String.prototype.format = function() {
+      var content = this;
+      for (var i=0; i < arguments.length; i++)
+      {
+        var replacement = '{' + i + '}';
+        content = content.replace(replacement, arguments[i]);
+      }
+      return content;
+    };
   });
