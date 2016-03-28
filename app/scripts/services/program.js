@@ -17,14 +17,17 @@ angular.module('jassemApp')
 
 
      */
-
-    var currentLabel = '';
+    var memory = null;
+    var currentIndex = 0;
+    var currentLabel = undefined;
     var currentAddress = 0x1000;
+
 
     var operations = [
       {
         'funcname': 'ld',
-        'args': ['i', '%r0']
+        'args': ['i', '%r0'],
+        'label': undefined
       }
     ];
 
@@ -51,6 +54,42 @@ angular.module('jassemApp')
 
     this.code = function () {
       return code;
+    };
+
+    var getIndexFromAddress = function(address) {
+      for(var i = 0; i < code.length; i++) {
+        if(code[i].address == address) {
+          return i - 1;
+        }
+      }
+    };
+
+    var getIndexFromLabel = function(label) {
+      for(var i = 0; i < code.length; i++) {
+        if(code[i].label == label) {
+          return i - 1;
+        }
+      }
+    };
+
+    this.jumpToAddress = function(address) {
+      var newIndex = getIndexFromAddress(address);
+      var oldIndex = getIndexFromAddress(this.currentAddress);
+      code[newIndex].isActive = true;
+      code[oldIndex].isActive = false;
+      this.currentAddress = address;
+      this.currentIndex = newIndex;
+    };
+
+    this.jumpToLabel = function(label) {
+      var newIndex = getIndexFromLabel(label);
+      console.log(newIndex);
+      console.log(currentIndex);
+      code[newIndex].isActive = true;
+      code[currentIndex].isActive = false;
+
+      currentAddress = code[newIndex].address;
+      currentIndex = newIndex;
     };
 
     var formatOperation = function (operation) {
@@ -88,14 +127,23 @@ angular.module('jassemApp')
         line = line.replace(/(\/+.*)/gm, ''); // Strip comments
         line = line.trim();
         //code.push(this.parseLine(line, 0, ""));
-        lineOperation = parseLine(line, 0, "");
+        try {
+          lineOperation = parseLine(line, 0, "");
+        } catch(error) {
+          throw(error);
+        }
         if(lineOperation != undefined) {
           addSymbol(lineOperation);
+          operations.push(lineOperation);
         }
-        operations.push(lineOperation);
       });
 
-      resetActive();
+      try {
+        var mainIndex = resetActive();
+        Memory.setPC(code[mainIndex].address);
+      } catch(problem) {
+        throw(problem);
+      }
       return this.code();
     };
 
@@ -104,71 +152,86 @@ angular.module('jassemApp')
       // then passes for component deconstruction
 
       var char = line.charAt(index);
-      if(substr == "ret") { // Only instruction lacking a space
+      if(substr == "ret") { // Only instruction lacking a space delimiter
         var operation = getOperation(line, 0);
         return operation
       }
       if(index == line.length) { return; }
 
-      switch(char) {
-        case ':':
-          setLabel(substr);
-          return;
-        case ' ':
-          switch(substr) {
-            // All 3-argument Commands
-            case "add":
-            case "sub":
-            case "mul":
-            case "idiv":
-            case "imod":
-              return getOperation(line, 3);
-            // All 2-argument Commands
-            case "ld":
-            case "st":
-            case "cmp":
-            case "mov":
-              return getOperation(line, 2);
-            // All 1-argument Commands
-            case "push":
-            case "pop":
-            case "jsr":
-            case "b":
-            case "bge":
-              return getOperation(line, 1);
-            default:
-              break;
-          }
-        default:
-          substr = substr.concat(char);
-          return parseLine(line, index + 1, substr);
+      try {
+        switch (char) {
+          case ':':
+            setLabel(substr);
+            return;
+          case ' ':
+            switch (substr) {
+              // All 3-argument Commands
+              case "add":
+              case "sub":
+              case "mul":
+              case "idiv":
+              case "imod":
+                return getOperation(line, 3);
+              // All 2-argument Commands
+              case "ld":
+              case "st":
+              case "cmp":
+              case "mov":
+                return getOperation(line, 2);
+              // All 1-argument Commands
+              case "push":
+              case "pop":
+              case "jsr":
+              case "b":
+              case "bge":
+                return getOperation(line, 1);
+              default:
+                break;
+            }
+          default:
+            substr = substr.concat(char);
+            return parseLine(line, index + 1, substr);
+        }
+      } catch(error) {
+        throw(error);
       }
     };
 
     var getOperation = function(str, numArgs) {
       // Takes line and disassembles into components using regex
       var regex;
-      switch(numArgs) {
-        case 0: regex = /^(\S+)$/g; break;
-        case 1: regex = /^(\S+)\s+(\S+)$/g; break;
-        case 2: regex = /^(\S+)\s+(\S+)\s*(?:,|\->)\s*(\S+)$/g; break;
-        case 3: regex = /^(\S+)\s+(\S+)\s*,\s*(\S+)\s*->\s?(\S+)$/g; break;
-        default: throw("OutOfBoundsException: Must provide number between 0 and 3. Found: " + numArgs);
+      switch (numArgs) {
+        case 0:
+          regex = /^(\S+)$/g;
+          break;
+        case 1:
+          regex = /^(\S+)\s+(\S+)$/g;
+          break;
+        case 2:
+          regex = /^(\S+)\s+(\S+)\s*(?:,|\->)\s*(\S+)$/g;
+          break;
+        case 3:
+          regex = /^(\S+)\s+(\S+)\s*,\s*(\S+)\s*->\s?(\S+)$/g;
+          break;
       }
 
-      var match = regex.exec(str);
+      try {
+        var match = regex.exec(str);
+      } catch(error) {
+        throw("Invalid Line: " + str);
+      }
       var object = {
         'funcname': match[1],
         'args': [],
         'label': currentLabel
       };
+
       currentLabel = undefined;
       for(var i = 2; i < 5; i++) {
         if (match[i] != undefined) object.args.push(match[i]);
       }
-      console.log(object);
       return object;
-    }
+    };
 
     var setLabel = function(label) {
       currentLabel = label;
@@ -184,15 +247,25 @@ angular.module('jassemApp')
       code.push(codeSymbol);
     };
 
-    var memory = null;
-    var currentIndex = 0;
-
     var resetActive = function () {
-      currentIndex = 0;
+      // Reset highlight to main label and disable all others
+      // Returns: Index of first line of main function
+      currentIndex = -1;
+      for(var i = 0; i < operations.length; i++) {
+        if(operations[i] != undefined && operations[i].label == "main") {
+          if(currentIndex != -1) { throw("Error: Code cannot have multiple main labels."); }
+          currentIndex = i;
+          currentAddress = 0x1000 + currentIndex * 4;
+        }
+      }
+
+      if(currentIndex == -1) { throw("Error: Code must have a main label") }
+
       code.forEach(function(codeVar) {
         codeVar.isActive = false;
       });
       code[currentIndex].isActive = true;
+      return currentIndex;
     };
 
     this.compile = function (rawAssembly) {
@@ -203,12 +276,27 @@ angular.module('jassemApp')
 
     this.stepForward = function () {
       if (currentIndex == code.length - 1) { return; }
-      code[currentIndex].isActive = false;
-      currentIndex++;
-      code[currentIndex].isActive = true;
-      Memory.push(12);
-      Memory.push(123);
-      Memory.push(1234);
+
+      var currentOperation = operations[currentIndex];
+      var command = currentOperation.funcname;
+      var args = currentOperation.args;
+      console.log(currentOperation);
+
+      if(command == "jsr") { // Subroutine
+        var label = args[1];
+        this.jumpToLabel(label);
+        Memory[command](currentOperation);
+      } else if(command == "ret") { // return from subroutine
+        Memory[command](currentOperation);
+        this.jumpToAddress(Memory.memory().pc)
+      } else {
+        code[currentIndex].isActive = false;
+        currentIndex++;
+        currentAddress += 4;
+        code[currentIndex].isActive = true;
+        Memory[command](currentOperation);
+      }
+      Memory.setPC(currentAddress);
     };
 
     this.stepBackward = function () {
@@ -216,10 +304,8 @@ angular.module('jassemApp')
       code[currentIndex].isActive = false;
       currentIndex--;
       code[currentIndex].isActive = true;
-      Memory.pop();
-      Memory.pop();
-      Memory.pop();
-    }
+      Memory.setPC(currentAddress);
+    };
 
     String.prototype.format = function() {
       var content = this;

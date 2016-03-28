@@ -22,21 +22,21 @@ angular.module('jassemApp')
     ];
 
     this.memory = {
-      r0: 0x2,
-      r1: 0x2,
-      r2: 0x2,
-      r3: 0x2,
-      r4: 0x2,
-      sp: 0x2,
-      fp: 0x2,
-      pc: 0x2,
-      csr: 0x2,
+      r0: 0x0,
+      r1: 0x0,
+      r2: 0x0,
+      r3: 0x0,
+      r4: 0x0,
+      sp: 0xfff448,
+      fp: 0xfff448,
+      pc: 0x1000,
+      csr: 0x0,
       stack: [
         {
-          'address': 0xfff434,
+          'address': 0xfff448,
           'value': 0x2,
           'label': '',
-          'isActive': false
+          'highlight': 'both'
         }
       ],
       global: [
@@ -60,14 +60,19 @@ angular.module('jassemApp')
 
     this.error = '';
 
-    this.reset = function () {}
-    ;
+    this.reset = function () { };
 
     this.compile = function () {
       this.error = '';
-      this.memory = Program.compile(this.assemCode);
-      this.code = Program.parseCode(this.assemCode);
+      try {
+        this.memory = Program.compile(this.assemCode);
+        this.code = Program.parseCode(this.assemCode);
+
+      } catch(error) {
+        this.error = error;
+      }
     };
+
     this.stepForward = function () {
       try {
         Program.stepForward();
@@ -122,35 +127,32 @@ angular.module('jassemApp')
       this.cCodeEditorOptions['keyMap'] = 'vim';
     };
 
-    this.cCode = "\
-int a(int i, int j) {\n\
-  int k;\n\
+    this.cCode = "int a(int *p) {\n\
+    return *p;\n\
+}\n\
 \n\
-  if (i < j) {\n\
-    k = i;\n\
-  } else {\n\
-    k = j;\n\
-  }\n\
-  return k;\n\
-}";
+main() {\n\
+    int i, j;\n\
+\n\
+    j = 15;\n\
+    i = a(&j);\n\
+};";
 
     this.assemCode = "a:\n\
-    push #4\n\
-    ld [fp+12] -> %r0           / Load i into r0\n\
-    ld [fp+16] -> %r1           / Load j into r0\n\
+    ld [fp+12] -> %r0      / get p's value\n\
+    ld [r0] -> %r0         / dereference it\n\
+    ret\n\
 \n\
-    cmp %r0, %r1                / Compare and branch on the negation (greater than or equal)\n\
-    bge l1\n\
+main:\n\
+    push #8\n\
 \n\
-    ld [fp+12] -> %r0           / k = i\n\
+    mov #15 -> %r0         / j = 15\n\
     st %r0 -> [fp]\n\
-    b l2\n\
 \n\
-l1:\n\
-    ld [fp+16] -> %r0           / k = j\n\
-    st %r0 -> [fp]\n\
-l2:\n\
+    st %fp -> [sp]--       / push &j on the stack\n\
+    jsr a                  / and call a()\n\
+    pop #4\n\
+    st %r0 -> [fp-4]\n\
 \n\
-    ld [fp] -> %r0              / return k\n\
     ret";
   });

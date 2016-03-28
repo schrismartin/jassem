@@ -17,8 +17,8 @@
   <!-- Buttons -->
   <div class="col-sm-12 text-center">
     <button type="button" class="btn btn btn-primary" ng-click="main.compile()">Compile</button>
-    <button type="button" class="btn btn btn-default" ng-click="main.stepBackward()">Step Backwards</button>
-    <button type="button" class="btn btn btn-default" ng-click="main.stepForward()">Step Forwards</button>
+    <!--<button type="button" class="btn btn btn-default" ng-click="main.stepBackward()">Step Backwards</button>-->
+    <button type="button" class="btn btn btn-default" ng-click="main.stepForward()">Step Forward</button>
     <button type="button" class="btn btn btn-default">Animate</button>
     <button type="button" class="btn btn btn-danger" ng-click="main.reset()">Reset</button>
     <button type="button" class="btn btn btn-danger" ng-click="main.letThereBeVIM()">VIM!</button>
@@ -29,13 +29,13 @@
   <!-- Visualizer -->
   <div  style="margin-bottom: 40px;">
     <div ng-class="{alert: main.error, 'alert-danger': main.error}" class="col-sm-12 text-center" role="alert">
-      <div ng-if="main.error" class="col-sm-12 text-center" style="margin-bottom: 40px; font-size: xx-large;">{{main.error}}</div>
+      <div ng-if="main.error" class="col-sm-12 text-center" style="margin-bottom: 40px;"><strong>{{main.error}}</strong></div>
       <div class="col-sm-4">
         <h4 class="text-center">Stack</h4>
         <table class="col-xs-12" style="margin-bottom: 20px;">
           <tr ng-repeat="stackVar in main.memory.stack">
             <td>{{stackVar.address | hex}}</td>
-            <td class="boxEntry">{{stackVar.value | hex}}</td>
+            <td ng-class="{'sp-cell': stackVar.highlight == 'sp', 'fp-cell': stackVar.highlight == 'fp', 'both-cell': stackVar.highlight == 'both'}" class="boxEntry">{{stackVar.value | hex}}</td>
           </tr>
         </table>
       </div>
@@ -71,15 +71,15 @@
           </tr>
           <tr>
             <td>sp</td>
-            <td class="boxEntry">{{main.memory.sp | hex}}</td>
+            <td ng-class="{'sp-cell': 1}" class="boxEntry">{{main.memory.sp | hex}}</td>
           </tr>
           <tr>
             <td>fp</td>
-            <td class="boxEntry">{{main.memory.fp | hex}}</td>
+            <td ng-class="{'fp-cell': 1}" class="boxEntry">{{main.memory.fp | hex}}</td>
           </tr>
           <tr>
             <td>pc</td>
-            <td class="boxEntry">{{main.memory.pc | hex}}</td>
+            <td ng-class="{'active-cell': 1}" class="boxEntry">{{main.memory.pc | hex}}</td>
           </tr>
         </table>
         <h4 class="text-center">Globals</h4>

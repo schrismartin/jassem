@@ -11,38 +11,14 @@ angular.module('jassemApp')
   .service('Memory', function () {
     // AngularJS will instantiate a singleton by calling "new" on this function
 
-    //TODO: I don't know how I feel about memory model right now. It works but might fall apart once we start implementing things
+    //TODO: I don't know how I feel about memory model right now. It works but might fall apart once we start implementing things\
 
-    var memory = {
-      r0: 0x0,
-      r1: 0x0,
-      r2: 0x0,
-      r3: 0x0,
-      r4: 0x0,
-      sp: 0xfff434,
-      fp: 0xfff434,
-      pc: 0x0,
-      csr: 0x0,
-      stack: [
-        {
-          'address': 0xfff434,
-          'value': 0x1,
-          'label': '',
-          'isActive': false
-        }
-      ],
-      global: [
-        {
-          'address': 0x4,
-          'value': 0x2,
-          'label': 'i',
-          'isActive': false
-        }
-      ]
-    };
+    var memory;
+
     this.memory = function () {
       return memory;
     };
+
     this.resetMemory = function () {
       memory = {
         r0: 0x0,
@@ -50,29 +26,57 @@ angular.module('jassemApp')
         r2: 0x0,
         r3: 0x0,
         r4: 0x0,
-        sp: 0xfff434,
-        fp: 0xfff434,
-        pc: 0x0,
+        _sp: 0xfff448,
+        set sp(addr) {
+          console.log("SP Setting");
+          var oldIndex = getStackIndexFromAddress(memory.sp);
+          var newIndex = getStackIndexFromAddress(addr);
+          memory.stack[oldIndex].highlight = memory.fp == memory.sp ? 'fp' : '';
+          memory.stack[newIndex].highlight = memory.fp == addr ? 'both' : 'sp';
+          console.log("SP Set from " +memory.sp.toString(16)+ " to " +addr.toString(16));
+          memory._sp = addr;
+        },
+        _fp: 0xfff448,
+        get sp() {
+          return memory._sp;
+        },
+        set fp(addr) {
+          console.log("FP Setting");
+          var oldIndex = getStackIndexFromAddress(memory.fp);
+          var newIndex = getStackIndexFromAddress(addr);
+          memory.stack[oldIndex].highlight = memory.sp == memory.fp ? 'sp' : '';
+          memory.stack[newIndex].highlight = memory.sp == addr ? 'both' : 'fp';
+          memory._fp = addr;
+          console.log("SP Set from " +memory.fp.toString(16)+ " to " +addr.toString(16));;
+        },
+        get fp() {
+          return memory._fp;
+        },
+        pc: 0x1000,
         csr: 0x0,
         stack: [
           {
-            'address': 0xfff434,
+            'address': 0xfff448,
             'value': 0x0,
             'label': '',
-            'isActive': false
+            'highlight': ''
           }
         ],
-        global: []
+        global: [
+          {
+            'address': 0x4,
+            'value': 0x2,
+            'label': 'i',
+            'highlight': ''
+          }
+        ]
       };
+
+      memory.fp = 0xfff448;
+      memory.sp = 0xfff448;
+      memory.pc = 0x1000;
     };
-    //var sp = 0x0;
-    //var fp = 0x0;
-    //var pc = 0x0;
-    //var csr = 0x0;
-    //var ir = 0x0;
-    //var g0 = 0x0;
-    //var g1 = 0x1;
-    //var gm1 = -1;
+
     var addressMap = function () {
       var addrMap = {};
       memory.stack.forEach(function(stackVar) {
@@ -83,86 +87,196 @@ angular.module('jassemApp')
       });
       return addrMap;
     };
-    //var addressMap = {
-    //  0xfff434: 0x1
-    //};
-    //var stack = [
-    //  {
-    //    'address': 0xfff434,
-    //    'value': 0x1,
-    //    'label': '',
-    //    'isActive': false
-    //  }
-    //];
-    //var global = [
-    //  //{
-    //  //  'address': 0xfff434,
-    //  //  'value': 0x0,
-    //  //  'label': '',
-    //  //  'isActive': false
-    //  //}
-    //];
-    //var code = [
-    //  //{
-    //  //  'address': 0x1000,
-    //  //  'value': 0x0,
-    //  //  'label': '',
-    //  //  'isActive': false
-    //  //}
-    //];
 
-    this.load = function (address, register) {
-      this.memory[register] = addressMap()[address];
-    };
+    var addLineToStack = function(numlines) {
+      if(numlines == undefined) { numlines = 1;}
+      for(var i = 0; i < numlines; i++) {
+        try {
+          var addr = memory.stack[memory.stack.length - 1].address;
+        }
+        catch (e) {
+          throw new Error("Memory Corruption!");
+        }
 
-    this.store = function (register, address) {
-      addressMap()[address] = this.memory[register]
-    };
-
-    this.push = function (value) {
-      try {
-        var addr = memory.stack[memory.stack.length - 1].address;
+        memory.stack.push({
+          'address': addr - 4,
+          'value': 0x0,
+          'label': '',
+          'highlight': ''
+        });
       }
-      catch (e) {
-        throw new Error("Memory Corruption!");
-      }
-      memory.stack.push({
-        'address': addr + 4,
-        'value': value,
-        'label': '',
-        'isActive': false
-      });
     };
-    this.pop = function () {
+
+    this.setPC = function(newPC) {
+      memory.pc = newPC;
+    };
+
+
+
+    var getStackIndexFromAddress = function(address) {
+      for(var i = 0; i < memory.stack.length; i++) {
+        if(memory.stack[i].address == address) {
+          return i;
+        }
+      }
+      return -1;
+    };
+
+    var setRegister = function(register, value) {
+      register = register.replace('%','');
+      memory[register] = value;
+    };
+
+    var getRegister = function(register) {
+      register = register.replace('%','');
+      return memory[register];
+    }
+
+    var parseConst = function(token) {
+      return token.replace('#', '');
+    };
+
+    var incdecReg = function(token, reg) {
+      if(token != undefined) {
+        var rv;
+        if(token == '--') {
+          rv = memory[reg] - 4;
+        } else if(token == '++') {
+          rv = memory[reg] + 4;
+        }
+
+        var index = getStackIndexFromAddress(rv);
+        if(index == -1) {
+          addLineToStack();
+        }
+
+        memory[reg] = rv;
+      }
+    };
+
+    var parsePointer = function(token) {
+      var regex = /^\[([a-z0-9]+)([+-])?([0-9]+)?\]([\-+]{2})?$/g;
+      var match = regex.exec(token);
+      var reg = match[1];
+      var addr = memory[reg];
+      var op = match[2];
+      var offset = match[3];
+      var incdec = match[4];
+
+      // Handle pointer offset
+      if(op != undefined && offset != undefined) {
+        if(op == '+') {
+          var rv = addr + parseInt(offset);
+          incdecReg(incdec, reg);
+          return rv
+        } else if(op == '-') {
+          var rv = addr - parseInt(offset);
+          incdecReg(incdec, reg);
+          return rv
+        }
+      }
+      incdecReg(incdec, reg);
+      return addr;
+    };
+
+    var parseToken = function(token) {
+      if (token.charAt(0) == '#') { // Handle constants
+        console.log("Pointer Detected");
+        var rv = parseConst(token);
+        console.log("Constant Resolved: " +token+ " converted to " +rv);
+        return rv;
+      }
+      if(token.match(/^\[([a-z]+)([+-])?([0-9]+)?\]([\-+]{2})?$/g) != undefined) { // Handle Pointers
+        console.log("Pointer Detected");
+        var rv = parsePointer(token);
+        console.log("Pointer Resolved: " +token+ " converted to 0x" + rv.toString(16));
+        return rv;
+      }
+    };
+
+    var setStackValueAtAddress = function(value, addr) {
+      var index = getStackIndexFromAddress(addr);
+      memory.stack[index].value = value;
+    };
+
+    var getStackValueAtAddress = function(addr) {
+      var index = getStackIndexFromAddress(addr);
+      return memory.stack[index].value;
+    };
+
+    this.ld = function (operation) {
+      var ptr = operation.args[0];
+      var reg = operation.args[1];
+
+      var addr = parseToken(ptr);
+      var index = getStackIndexFromAddress(addr);
+      console.log(index);
+      var ptrval = memory.stack[index].value;
+      console.log(ptrval);
+
+      setRegister(reg, ptrval);
+    };
+
+    this.st = function (operation) {
+      var reg = operation.args[0];
+      var addr = operation.args[1];
+      var val = parseToken(addr);
+      var index = getStackIndexFromAddress(val);
+      memory.stack[index].value = getRegister(reg);
+    };
+
+    this.push = function (operation) {
+      var num = parseToken(operation.args[0]) / 4;
+      for(var i = 0; i < num; i++) {
+        addLineToStack();
+        memory.sp -= 4;
+      }
+    };
+
+    this.pop = function (operation) {
       memory.stack.pop();
     };
-    this.jsr = function () {
+    this.jsr = function (operation) {
+      addLineToStack(3);
+
+      //memory.sp -= 4;
+      setStackValueAtAddress(memory.pc + 4, memory.sp);
+      memory.sp -= 4;
+      setStackValueAtAddress(memory.fp, memory.sp);
+      memory.sp -= 4;
+      memory.fp = memory.sp
+    };
+    this.ret = function (operation) {
+      memory.sp += 4;
+      memory.fp = getStackValueAtAddress(memory.sp);
+      memory.sp += 4;
+      memory.pc = getStackValueAtAddress(memory.sp);
 
     };
-    this.ret = function () {
+    this.cmp = function (operation) {
 
     };
-    this.cmp = function () {
+    this.mov = function (operation) {
+      var val = parseToken(operation.args[0]);
+      var reg = operation.args[1];
+      setRegister(reg, val);
+    };
+    this.add = function (operation) {
 
     };
-    this.mov = function () {
+    this.sub = function (operation) {
 
     };
-    this.add = function () {
+    this.mul = function (operation) {
 
     };
-    this.sub = function () {
+    this.idiv = function (operation) {
 
     };
-    this.mul = function () {
+    this.imod = function (operation) {
 
     };
-    this.idiv = function () {
 
-    };
-    this.imod = function () {
-
-    };
 
     //this.r0 = function () {
     //  return registers.r0;

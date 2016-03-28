@@ -10,6 +10,21 @@
   background: cornflowerblue;
 }
 
+.sp-cell {
+  color: white;
+  background: #339933;
+}
+
+.fp-cell {
+  color: white;
+  background: #9B7536;
+}
+
+.both-cell {
+  color: white;
+  background: linear-gradient(#339933, #9B7536);
+}
+
 body {
   padding: 0;
 }
