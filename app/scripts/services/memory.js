@@ -47,12 +47,20 @@ angular.module('jassemApp')
           memory.stack[oldIndex].highlight = memory.sp == memory.fp ? 'sp' : '';
           memory.stack[newIndex].highlight = memory.sp == addr ? 'both' : 'fp';
           memory._fp = addr;
-          console.log("SP Set from " +memory.fp.toString(16)+ " to " +addr.toString(16));;
+          console.log("FP Set from " +memory.fp.toString(16)+ " to " +addr.toString(16));
         },
         get fp() {
           return memory._fp;
         },
-        pc: 0x1000,
+        _pc: 0x1000,
+        set pc(addr) {
+          console.log("PC Setting");
+          memory._pc = addr;
+          console.log("PC Set from "+memory.pc.toString(16)+ " to " +addr.toString(16));
+        },
+        get pc() {
+          return memory._pc
+        },
         csr: 0x0,
         stack: [
           {
@@ -91,12 +99,12 @@ angular.module('jassemApp')
     var addLineToStack = function(numlines) {
       if(numlines == undefined) { numlines = 1;}
       for(var i = 0; i < numlines; i++) {
-        try {
+        // try {
           var addr = memory.stack[memory.stack.length - 1].address;
-        }
-        catch (e) {
-          throw new Error("Memory Corruption!");
-        }
+        // }
+        // catch (e) {
+        //   throw new Error("Memory Corruption!");
+        // }
 
         memory.stack.push({
           'address': addr - 4,
@@ -110,8 +118,6 @@ angular.module('jassemApp')
     this.setPC = function(newPC) {
       memory.pc = newPC;
     };
-
-
 
     var getStackIndexFromAddress = function(address) {
       for(var i = 0; i < memory.stack.length; i++) {
@@ -234,7 +240,10 @@ angular.module('jassemApp')
     };
 
     this.pop = function (operation) {
-      memory.stack.pop();
+      var num = parseToken(operation.args[0]) / 4;
+      for(var i = 0; i < num; i++) {
+        memory.sp += 4;
+      }
     };
     this.jsr = function (operation) {
       addLineToStack(3);
@@ -262,19 +271,54 @@ angular.module('jassemApp')
       setRegister(reg, val);
     };
     this.add = function (operation) {
+      var firstreg = operation.args[0];
+      var secondreg = operation.args[1];
+      var store = operation.args[2];
 
+      var val1 = parseInt(getRegister(firstreg));
+      var val2 = parseInt(getRegister(secondreg));
+      var sum = val1 + val2;
+      setRegister(store, sum);
     };
     this.sub = function (operation) {
+      var firstreg = operation.args[0];
+      var secondreg = operation.args[1];
+      var store = operation.args[2];
 
+      var val1 = parseInt(getRegister(firstreg));
+      var val2 = parseInt(getRegister(secondreg));
+      var sub = val1 - val2;
+      setRegister(store, sub);
     };
     this.mul = function (operation) {
+      var firstreg = operation.args[0];
+      var secondreg = operation.args[1];
+      var store = operation.args[2];
 
+      var val1 = parseInt(getRegister(firstreg));
+      var val2 = parseInt(getRegister(secondreg));
+      var prod = val1 * val2;
+      setRegister(store, prod);
     };
     this.idiv = function (operation) {
+      var firstreg = operation.args[0];
+      var secondreg = operation.args[1];
+      var store = operation.args[2];
 
+      var val1 = parseInt(getRegister(firstreg));
+      var val2 = parseInt(getRegister(secondreg));
+      var div = Math.floor(val1 / val2);
+      setRegister(store, div);
     };
     this.imod = function (operation) {
+      var firstreg = operation.args[0];
+      var secondreg = operation.args[1];
+      var store = operation.args[2];
 
+      var val1 = parseInt(getRegister(firstreg));
+      var val2 = parseInt(getRegister(secondreg));
+      var mod = val1 % val2;
+      setRegister(store, mod);
     };
 
 

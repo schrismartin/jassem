@@ -64,22 +64,22 @@ angular.module('jassemApp')
 
     this.compile = function () {
       this.error = '';
-      try {
+      // try {
         this.memory = Program.compile(this.assemCode);
         this.code = Program.parseCode(this.assemCode);
 
-      } catch(error) {
-        this.error = error;
-      }
+      // } catch(error) {
+      //   this.error = error;
+      // }
     };
 
     this.stepForward = function () {
-      try {
+      // try {
         Program.stepForward();
-      }
-      catch (e) {
-        this.error = e.message;
-      }
+      // }
+      // catch (e) {
+      //   this.error = e.message;
+      // }
     };
     this.stepBackward = function () {
       this.error = '';
