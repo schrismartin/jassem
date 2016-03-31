@@ -59,18 +59,19 @@ angular.module('jassemApp')
     ];
 
     this.error = '';
+    this.success = '';
 
     this.reset = function () { };
 
     this.compile = function () {
       this.error = '';
-      // try {
+      try {
         this.memory = Program.compile(this.assemCode);
         this.code = Program.parseCode(this.assemCode);
 
-      // } catch(error) {
-      //   this.error = error;
-      // }
+      } catch(error) {
+        this.error = error;
+      }
     };
 
     this.stepForward = function () {

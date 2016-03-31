@@ -99,12 +99,12 @@ angular.module('jassemApp')
     var addLineToStack = function(numlines) {
       if(numlines == undefined) { numlines = 1;}
       for(var i = 0; i < numlines; i++) {
-        // try {
+        try {
           var addr = memory.stack[memory.stack.length - 1].address;
-        // }
-        // catch (e) {
-        //   throw new Error("Memory Corruption!");
-        // }
+        }
+        catch (e) {
+          throw new Error("Memory Corruption!");
+        }
 
         memory.stack.push({
           'address': addr - 4,
@@ -161,38 +161,38 @@ angular.module('jassemApp')
     };
 
     var parsePointer = function(token) {
-      var regex = /^\[([a-z0-9]+)([+-])?([0-9]+)?\]([\-+]{2})?$/g;
+      var regex = /^([\-+]{2})?\[([a-z0-9]+)([+-])?([0-9]+)?\]([\-+]{2})?$/g;
       var match = regex.exec(token);
-      var reg = match[1];
+      var incdecBeg = match[1];
+      var reg = match[2];
+
+      // Incdec beginning before addr is called
+      incdecReg(incdecBeg, reg);
       var addr = memory[reg];
-      var op = match[2];
-      var offset = match[3];
-      var incdec = match[4];
+      var op = match[3];
+      var offset = match[4] != undefined ? parseInt(match[4]) : 0;
+      var incdecEnd = match[5];
 
       // Handle pointer offset
-      if(op != undefined && offset != undefined) {
+      if(op != undefined) {
         if(op == '+') {
-          var rv = addr + parseInt(offset);
-          incdecReg(incdec, reg);
-          return rv
+          addr = addr + offset
         } else if(op == '-') {
-          var rv = addr - parseInt(offset);
-          incdecReg(incdec, reg);
-          return rv
+          addr = addr - offset
         }
       }
-      incdecReg(incdec, reg);
+      incdecReg(incdecEnd, reg);
       return addr;
     };
 
     var parseToken = function(token) {
       if (token.charAt(0) == '#') { // Handle constants
-        console.log("Pointer Detected");
+        console.log("Constant Detected");
         var rv = parseConst(token);
         console.log("Constant Resolved: " +token+ " converted to " +rv);
         return rv;
       }
-      if(token.match(/^\[([a-z]+)([+-])?([0-9]+)?\]([\-+]{2})?$/g) != undefined) { // Handle Pointers
+      if(token.match(/^([\-+]{2})?\[([a-z]+)([+-])?([0-9]+)?\]([\-+]{2})?$/g) != undefined) { // Handle Pointers
         console.log("Pointer Detected");
         var rv = parsePointer(token);
         console.log("Pointer Resolved: " +token+ " converted to 0x" + rv.toString(16));
@@ -215,6 +215,7 @@ angular.module('jassemApp')
       var reg = operation.args[1];
 
       var addr = parseToken(ptr);
+      console.log(addr);
       var index = getStackIndexFromAddress(addr);
       console.log(index);
       var ptrval = memory.stack[index].value;

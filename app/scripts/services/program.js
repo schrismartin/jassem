@@ -129,23 +129,23 @@ angular.module('jassemApp')
         line = line.replace(/(\/+.*)/gm, ''); // Strip comments
         line = line.trim();
         //code.push(this.parseLine(line, 0, ""));
-        // try {
+        try {
           lineOperation = parseLine(line, 0, "");
-        // } catch(error) {
-        //   throw(error);
-        // }
+        } catch(error) {
+          throw(error);
+        }
         if(lineOperation != undefined) {
           addSymbol(lineOperation);
           operations.push(lineOperation);
         }
       });
 
-      // try {
+      try {
         var mainIndex = resetActive();
         Memory.setPC(code[mainIndex].address);
-      // } catch(problem) {
-      //   throw(problem);
-      // }
+      } catch(problem) {
+        throw(problem);
+      }
       return this.code();
     };
 
@@ -160,7 +160,7 @@ angular.module('jassemApp')
       }
       if(index == line.length) { return; }
 
-      // try {
+      try {
         switch (char) {
           case ':':
             setLabel(substr);
@@ -194,9 +194,9 @@ angular.module('jassemApp')
             substr = substr.concat(char);
             return parseLine(line, index + 1, substr);
         }
-      // } catch(error) {
-      //   throw(error);
-      // }
+      } catch(error) {
+        throw(error);
+      }
     };
 
     var getOperation = function(str, numArgs) {
@@ -217,11 +217,11 @@ angular.module('jassemApp')
           break;
       }
 
-      // try {
+      try {
         var match = regex.exec(str);
-      // } catch(error) {
-      //   throw("Invalid Line: " + str);
-      // }
+      } catch(error) {
+        throw("Invalid Line: " + str);
+      }
       var object = {
         'funcname': match[1],
         'args': [],
