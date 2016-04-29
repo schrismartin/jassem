@@ -20,8 +20,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // bower:js
-      'bower_components/jquery/dist/jquery.js',
       'bower_components/angular/angular.js',
+      'bower_components/jquery/dist/jquery.js',
       'bower_components/bootstrap/dist/js/bootstrap.js',
       'bower_components/angular-animate/angular-animate.js',
       'bower_components/angular-aria/angular-aria.js',
@@ -35,6 +35,10 @@ module.exports = function(config) {
       'bower_components/angular-ui-router/release/angular-ui-router.js',
       'bower_components/lodash/lodash.js',
       'bower_components/codemirror/lib/codemirror.js',
+      'bower_components/codemirror/mode/clike/clike.js',
+      'bower_components/codemirror/addon/dialog/dialog.js',
+      'bower_components/codemirror/addon/search/searchcursor.js',
+      'bower_components/codemirror/keymap/vim.js',
       'bower_components/angular-ui-codemirror/ui-codemirror.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
